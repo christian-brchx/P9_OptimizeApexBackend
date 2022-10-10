@@ -61,7 +61,7 @@ private class testUpdateAccountCA {
         update orders;
         Test.stopTest();
         Account newAcc = [SELECT Id, Chiffre_d_affaires__c FROM Account WHERE Id = :acc.Id];
-        // 200 orders * 20 orderitems * 200 € = 400000 €
+        // 200 orders * 20 orderitems * 100 € = 400000 €
         System.assertEquals(400000,newAcc.Chiffre_d_affaires__c,'Le CA est erroné');
     }
 }
