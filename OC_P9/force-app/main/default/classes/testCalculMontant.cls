@@ -7,59 +7,30 @@ private class testCalculMontant {
     }
 
     @isTest static void calculMontantForMoreThanOneOrder() {
-        // create the account
-        Account acc = new Account(Name = 'Test Account',Phone = '0000000000');
-        acc.Chiffre_d_affaires__c = 0;
-        insert acc;
+        // create one account with a CA of 0
+        Account acc = TestDataFactory.createAccount(0);
 
-        // First, set up test price book entries.
         // Insert a test product.
-        Product2 prod = new Product2(Name = 'Chemise Verte longue XYX', 
-            Family = 'Chemise');
-        insert prod;
-        
-        // Get standard price book ID.
-        // This is available irrespective of the state of SeeAllData.
-        Id pricebookId = Test.getStandardPricebookId();
-        
-        // 1. Insert a price book entry for the standard price book.
-        // Standard price book entries require the standard price book ID we got earlier.
-        PricebookEntry standardPrice = new PricebookEntry(
-            Pricebook2Id = pricebookId, Product2Id = prod.Id,
-            UnitPrice = 10000, IsActive = true);
-        insert standardPrice;
-        
-        // Create a custom price book
-        Pricebook2 customPB = new Pricebook2(Name='Custom Pricebook', isActive=true);
-        insert customPB;
-        
-        // 2. Insert a price book entry with a custom price.
-        PricebookEntry customPrice = new PricebookEntry(
-            Pricebook2Id = customPB.Id, Product2Id = prod.Id,
-            UnitPrice = 100, IsActive = true);
-        insert customPrice;
+        Id prodId = TestDataFactory.createTestProduct('Chemise Verte longue XYX', 'Chemise');
 
-        // create 2 orders of 10*100 for the account with shipmentcost of 10
-        List<Order> orders = new List<Order>();  
-        for (Integer i=0;i<2;i++) {
-            Order ord = new Order(Name = 'Commande ' + i,AccountId = acc.Id,EffectiveDate = Date.newInstance(2022,10,01), 
-                                 Status ='Draft', Pricebook2Id = customPB.Id);
-            ord.ShipmentCost__c = 10;
-            orders.add(ord);
-        }
-        insert orders;
-        List<OrderItem> orderItems = new List<OrderItem>();  
-        for (Order ord : orders) {
-            orderItems.add(new OrderItem (OrderId = ord.Id, Quantity=10, PricebookEntryId = customPrice.Id, UnitPrice = 100));
-        }
-        insert orderItems;
+        // Create a custom price book
+        Id customPBId = TestDataFactory.createCustomPriceBook('Custom Pricebook', prodId, 100);
+        
+        // Create a price book entry with a custom price.
+        Id customPBEId = TestDataFactory.createPriceBookEntryWithCustomPrice(customPBId, prodId, 100);
+
+        // create 2 orders of for the account with shipmentcost of 10
+        List<Order> orders = TestDataFactory.createOrdersOnAccount(acc.Id, 2, customPBId, 10);
+
+        // create orderItems on orders with quantity of 1O and unitPrice of 100
+        List<OrderItem> orderItems = TestDataFactory.createOrderItemsOnOrders(orders, 10, 100, customPBEId);
 
         // change quantity in orderItems
         for (OrderItem orditem : orderItems) {
             orditem.Quantity = 20;
         }
         update orderItems;
-        
+      
         Test.startTest();
         update orders;
         Test.stopTest();
