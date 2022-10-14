@@ -1,7 +1,7 @@
 @isTest
 public class TestDataFactory {
-    public static Account createAccount(Integer chiffreAffaires) {
-        Account a = new Account(Name='Test Account', Phone = '0000000000');
+    public static Account createAccount(String name, Integer chiffreAffaires) {
+        Account a = new Account(Name=name, Phone = '0000000000');
         a.Chiffre_d_affaires__c = chiffreAffaires;
         insert a;
         return a;
