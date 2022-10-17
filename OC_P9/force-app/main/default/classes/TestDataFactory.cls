@@ -7,6 +7,48 @@ public class TestDataFactory {
         return a;
     }
 
+    public static List<Account> createAccountsWithOrders(Integer numAccounts, 
+                                                        String prefixName, 
+                                                        Integer chiffreAffaires, 
+                                                        Integer amountOrder,
+                                                        Id priceBookId,
+                                                        Id pricebookEntryId) {
+        List<Account> accounts = new List<Account>();
+        for (Integer i=0 ; i<numAccounts ; i++) {
+            Account acc = new Account(Name=prefixName+i, Phone = '0000000000'); 
+            acc.Chiffre_d_affaires__c = chiffreAffaires;
+            accounts.add(acc);
+        }
+        insert accounts;
+        List<Order> orders = new List<Order>();  
+        for (Account acc :accounts){
+            Order ord = new Order(Name = 'Commande ' + acc.Name, AccountId = acc.Id, EffectiveDate = Date.today(), 
+                                    Status ='Draft', Pricebook2Id = priceBookId);
+            ord.ShipmentCost__c = 0;
+            orders.add(ord);
+        }
+        insert orders;
+
+        List<OrderItem> orderItems = new List<OrderItem>();  
+        for (Order ord :orders) {
+            orderItems.add(new OrderItem (OrderId = ord.Id, Quantity=1, PricebookEntryId = pricebookEntryId, UnitPrice = amountOrder));
+        }
+        insert orderItems;
+        return accounts;
+    }
+
+    public static List<Account> activateOrdersOfAccounts(Integer numAccounts) {
+        Map<Id,Account> mapAccounts = New Map<Id,Account>([SELECT Id FROM Account LIMIT :NumAccounts]);
+        List<Order> ordersToUpdate = [SELECT AccountId, Status FROM Order WHERE AccountId IN :mapAccounts.keySet()];
+        for (Order ord :ordersToUpdate) {
+            ord.Status = 'Activated';
+        }
+        update ordersToUpdate;
+        return mapAccounts.values();
+    }
+
+
+
     public static Id createTestProduct(String name, String family) {
         Product2 prod = new Product2(Name = name, 
             Family = family);

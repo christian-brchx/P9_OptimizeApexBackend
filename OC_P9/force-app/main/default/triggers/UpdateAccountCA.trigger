@@ -11,15 +11,7 @@ trigger UpdateAccountCA on Order (after update) {
     List<Account> listAccounts = [SELECT Id, Chiffre_d_affaires__c FROM Account WHERE Id IN :setAccountIds];
     Map<Id,Account> mapAccounts = new Map<Id,Account>(listAccounts);
     
-    // Pour chaque commande, mise à jour du chiffre d'affaire du compte associé à la commande
-    for(Order ord : trigger.new){
-        Account acc = mapAccounts.get(ord.AccountId);
-        if (acc != null) {
-            acc.Chiffre_d_affaires__c = acc.Chiffre_d_affaires__c + ord.TotalAmount;
-        } else {
-            System.debug('Error in UpdateAccountCA : Account id = '+ ord.AccountId + 'not found');
-        }
-    }
+    AP01Account.updateChiffreAffaireWithListOfOrders(false,new Map<Id,Account>(listAccounts),trigger.new);
     update listAccounts;
 
     System.debug('End UpdateAccountCA : number of orders updated : ' + trigger.new.size());
