@@ -37,8 +37,9 @@ public class TestDataFactory {
         return accounts;
     }
 
-    public static List<Account> activateOrdersOfAccounts(Integer numAccounts) {
-        Map<Id,Account> mapAccounts = New Map<Id,Account>([SELECT Id FROM Account LIMIT :NumAccounts]);
+    public static List<Account> activateOrdersOfAccounts(Integer numAccounts, String prefixAccount) {
+        String prefixAccountLike = prefixAccount+'%';
+        Map<Id,Account> mapAccounts = New Map<Id,Account>([SELECT Id FROM Account WHERE Name LIKE :prefixAccountLike LIMIT :NumAccounts]);
         List<Order> ordersToUpdate = [SELECT AccountId, Status FROM Order WHERE AccountId IN :mapAccounts.keySet()];
         for (Order ord :ordersToUpdate) {
             ord.Status = 'Activated';
@@ -46,8 +47,6 @@ public class TestDataFactory {
         update ordersToUpdate;
         return mapAccounts.values();
     }
-
-
 
     public static Id createTestProduct(String name, String family) {
         Product2 prod = new Product2(Name = name, 

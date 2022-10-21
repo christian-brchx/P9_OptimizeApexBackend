@@ -16,18 +16,20 @@ private class testBatch01AccountChiffreAffaire {
 
      @isTest static void testBatchOnOneHundredOfTwoHundredAccounts() {
         // Activate orders for 100 of 200 accounts
-        Map<Id,Account> mapAccountstoUpdate = new Map<ID,Account>(TestDataFactory.activateOrdersOfAccounts(100));
+        Map<Id,Account> mapAccountstoUpdate = new Map<ID,Account>(TestDataFactory.activateOrdersOfAccounts(100,'Test Batch 200 Accounts'));
 
         Test.startTest();
         ID batchprocessid = Database.executeBatch(new Batch01AccountChiffreAffaire());
         Test.stopTest();
         // Get the Accounts updated
-        List<Account> accountsUpdated = [SELECT Name, Chiffre_d_Affaires__c FROM Account WHERE ID IN :mapAccountstoUpdate.keySet() AND Name LIKE 'Test Batch 200 Accounts'];
-        List<Account> accountsNotUpdated = [SELECT Name, Chiffre_d_Affaires__c FROM Account WHERE ID NOT IN :mapAccountstoUpdate.keySet() AND Name LIKE 'Test Batch 200 Accounts'];
+        List<Account> accountsUpdated = [SELECT Name, Chiffre_d_Affaires__c FROM Account WHERE ID IN :mapAccountstoUpdate.keySet() AND Name LIKE 'Test Batch 200 Accounts%'];
+        List<Account> accountsNotUpdated = [SELECT Name, Chiffre_d_Affaires__c FROM Account WHERE ID NOT IN :mapAccountstoUpdate.keySet() AND Name LIKE 'Test Batch 200 Accounts%'];
         // The CA must be equal to 1000 for each account with order activated
+        System.assertEquals(100,accountsUpdated.size(),'100 comptes mis à jour doivent avoir été sélectionnés');
         for (Account acc :accountsUpdated) {
             System.assertEquals(1000,acc.Chiffre_d_Affaires__c,'CA invalide pour le compte : '+acc.Name);
         }
+        System.assertEquals(100,accountsNotUpdated.size(),'100 comptes non mis à jour doivent avoir été sélectionnés');
         // The CA must be equal to 0 for each account without order activated
         for (Account acc :accountsNotUpdated) {
             System.assertEquals(0,acc.Chiffre_d_Affaires__c,'CA invalide pour le compte : '+acc.Name);
