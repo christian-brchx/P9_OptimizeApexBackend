@@ -7,10 +7,8 @@ global class Batch01AccountChiffreAffaire implements Database.Batchable<sObject>
     }
     
     global void execute(Database.BatchableContext info, List<Account> scope){
-       List<Order> orders = AP01Account.getOrdersOfAccounts(scope);
        AP01Account.updateChiffreAffaireWithListOfOrders(true,new Map<Id,Account>(scope),AP01Account.getOrdersOfAccounts(scope));
        System.Debug('Batch01AccountChiffreAffaire.execute Nb Account ='+scope.size());
-       update scope;
     }    
     
     global void finish(Database.BatchableContext info){     

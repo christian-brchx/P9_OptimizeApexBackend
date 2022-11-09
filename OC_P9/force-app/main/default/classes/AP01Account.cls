@@ -4,6 +4,10 @@ public class AP01Account {
         return [SELECT AccountId, TotalAmount FROM Order WHERE AccountId IN :mapAccounts.keySet() ];
     }
 
+    public static List<Account> getAccountsOfOrders(set<Id> setAccountIds){
+        return [SELECT Id, Chiffre_d_affaires__c FROM Account WHERE Id IN :setAccountIds];
+    }
+
     public static void updateChiffreAffaireWithListOfOrders(boolean initCA,map<Id,Account> mapAccounts,List<Order> orders){
         // Reinitialisation du CA si demandé
         for (Account acc : mapAccounts.values()){
@@ -18,6 +22,7 @@ public class AP01Account {
                 System.debug('Error in AP01Account : Account id = '+ ord.AccountId + 'not found');
             }
         }
+        update(mapAccounts.values());
     }
 
 }

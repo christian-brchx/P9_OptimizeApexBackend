@@ -7,12 +7,10 @@ trigger UpdateAccountCA on Order (after update) {
         setAccountIds.add(ord.accountId);
     }
     
-    // Lecture des comptes liés aux commandes mises à jour
-    List<Account> listAccounts = [SELECT Id, Chiffre_d_affaires__c FROM Account WHERE Id IN :setAccountIds];
-    Map<Id,Account> mapAccounts = new Map<Id,Account>(listAccounts);
+    // Récupération des comptes liés aux commandes mises à jour
+    Map<Id,Account> mapAccounts = new Map<Id,Account>(AP01Account.getAccountsOfOrders(setAccountIds));
     
-    AP01Account.updateChiffreAffaireWithListOfOrders(false,new Map<Id,Account>(listAccounts),trigger.new);
-    update listAccounts;
+    AP01Account.updateChiffreAffaireWithListOfOrders(false,mapAccounts,trigger.new);
 
     System.debug('End UpdateAccountCA : number of orders updated : ' + trigger.new.size());
 }
