@@ -4,7 +4,13 @@ public class AP01Account {
         return [SELECT AccountId, TotalAmount FROM Order WHERE AccountId IN :mapAccounts.keySet() ];
     }
 
-    public static List<Account> getAccountsOfOrders(set<Id> setAccountIds){
+    public static List<Account> getAccountsOfOrders(List<Order> orders){
+        // stockage des Ids de comptes liés aux commandes mises à jour
+        set<Id> setAccountIds = new set<Id>();
+        for(Order ord : orders){
+            setAccountIds.add(ord.accountId);
+        }
+
         return [SELECT Id, Chiffre_d_affaires__c FROM Account WHERE Id IN :setAccountIds];
     }
 
